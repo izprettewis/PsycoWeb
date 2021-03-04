@@ -41,7 +41,7 @@ if b_language:
 b_comment = st.sidebar.checkbox('I want to add a comment', value=False)
 if b_comment:
     txt = st.text_area('Your feelings', '''The user will be able to put some comment here which will go through NLP''')
-#st.write('Sentiment:', run_sentiment_analysis(txt))    
+#st.write('Sentiment:', run_sentiment_analysis(txt))
 
 
 w_attribute_labels = ['neu','ext','ope','agr','con']
@@ -68,8 +68,8 @@ def datamix(**kwargs): #UserLanguage=w_language, has been removed for now
 
 
 def make_radar_chart(name="Big 5"):
-    if datamix(**kwargs).empty:
-        return st.write('Insufficient data. Please modify your query.')
+    if datamix().empty:
+        return st.write('Insufficient data')
     markers = list(datamix(**kwargs).mean()) 
 
 
@@ -89,7 +89,7 @@ def make_radar_chart(name="Big 5"):
     ax.fill(angles, stats, alpha=0.25)
     ax.set_thetagrids(angles * 180/np.pi, labels)
     plt.yticks(markers)
-    ax.set_title(name+': The pentagonal chart you see applies for '+str(len(datamix(**kwargs)))+' people')
+    ax.set_title(name+': Our database runs pentagonal chart for ('+'str(datamix()[1])'+' people)')
     ax.grid(True)
 
 

@@ -1,12 +1,12 @@
 
 import streamlit as st
-
+import time
 import numpy as np
 import pandas as pd
 
 import matplotlib.pyplot as plt
 import numpy as np
-
+import requests
 
 
 
@@ -18,7 +18,7 @@ st.write("""Exploration of PsyCOVID database""")
 progress_bar = st.sidebar.progress(1)
 status_text = st.sidebar.empty()    
 
-data = pd.read_csv('covfinal.csv', error_bad_lines=False, encoding='latin-1').fillna(0)
+data = pd.read_csv('covfinal.csv', error_bad_lines=False, encoding='latin-1', low_memory=False)
 
 kwargs = {}
 
@@ -41,12 +41,12 @@ if b_language:
 b_comment = st.sidebar.checkbox('I want to add a comment', value=False)
 if b_comment:
     txt = st.text_area('Your feelings', '''The user will be able to put some comment here which will go through NLP''')
-#st.write('Sentiment:', run_sentiment_analysis(txt))    
+#st.write('Sentiment:', run_sentiment_analysis(txt))
 
 
 w_attribute_labels = ['neu','ext','ope','agr','con']
 
-st.write(kwargs)
+
 
     
 def datamix(**kwargs): #UserLanguage=w_language, has been removed for now
@@ -55,22 +55,23 @@ def datamix(**kwargs): #UserLanguage=w_language, has been removed for now
         
         if type(value) is list:
             mix = mix.loc[data[key].isin(value)] #cast a list or a string
-            
+            pass
         else: 
             mix = mix.loc[data[key]==value]
 
-    #st.write('mix cast:',locals()['mix'])
+    st.write('mix cast:',locals()['mix'])
 
 
-
-    return mix[w_attribute_labels]
- 
+    if len(mix)>0:
+        return mix[w_attribute_labels],len(mix)
+    else:
+        return 'err1' #This is only a placeholder for insufficient data
 
 
 def make_radar_chart(name="Big 5"):
-    if datamix(**kwargs).empty:
-        return st.write('Insufficient data. Please modify your query.')
-    markers = list(datamix(**kwargs).mean()) 
+    if datamix() == 'err1':
+        return st.write('Insufficient data')
+    markers = list(datamix()[0].mean()) 
 
 
     labels = np.array(w_attribute_labels)
@@ -89,12 +90,12 @@ def make_radar_chart(name="Big 5"):
     ax.fill(angles, stats, alpha=0.25)
     ax.set_thetagrids(angles * 180/np.pi, labels)
     plt.yticks(markers)
-    ax.set_title(name+': The pentagonal chart you see applies for '+str(len(datamix(**kwargs)))+' people')
+    ax.set_title(name+': Our database runs pentagonal chart for ('+str(datamix()[1])+' people)')
     ax.grid(True)
 
 
 
     return st.pyplot(fig)
 
-make_radar_chart()
-#datamix()
+#make_radar_chart()
+datamix()
